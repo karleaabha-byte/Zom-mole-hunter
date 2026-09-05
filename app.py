@@ -1,4 +1,3 @@
-```python
 from __future__ import annotations
 
 import secrets
@@ -237,4 +236,4 @@ if __name__ == "__main__":
         port=8000,
         debug=True,
     )
-```
+
