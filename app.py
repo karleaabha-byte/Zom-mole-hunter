@@ -145,6 +145,11 @@ def new_game():
 
         state.demo_run_number = next_run
 
+        # Carry the detective's name across a new case.
+        state.player_name = getattr(
+            old_state, "player_name", "DETECTIVE"
+        )
+
         # Alternate Storage outcome:
         # Game 1 -> NOT_FOUND
         # Game 2 -> FOUND
@@ -194,6 +199,11 @@ def game_action(action: str):
                 str(payload.get("character", ""))
             )
 
+        elif action == "name":
+            ok, result = state.set_player_name(
+                str(payload.get("name", ""))
+            )
+
         elif action == "accuse":
             ok, result = state.make_accusation(
                 str(payload.get("character", "")),
@@ -236,4 +246,3 @@ if __name__ == "__main__":
         port=8000,
         debug=True,
     )
-
