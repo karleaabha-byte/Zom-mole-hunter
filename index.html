@@ -117,6 +117,17 @@
   @keyframes flick{ 0%,92%,100%{opacity:1;} 93%{opacity:0.4;} 94%{opacity:1;} 95%{opacity:0.3;} 96%{opacity:1;} }
   .boot h2{ font-family:var(--mono); font-weight:500; font-size:15px; letter-spacing:0.32em; color:var(--rust-bright); text-transform:uppercase; margin:0 0 30px; }
   .boot p.tag{ font-family:var(--type); color:var(--text-dim); max-width:480px; line-height:1.7; font-size:18px; margin-bottom:34px; }
+  .namefield{ display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:26px; }
+  .namefield label{ font-family:var(--mono); font-size:12px; letter-spacing:0.22em; color:var(--text-faint); text-transform:uppercase; }
+  .namefield input{
+    width:300px; max-width:80vw; text-align:center;
+    background:#0a0f0b; border:1px solid var(--line); color:var(--toxic);
+    font-family:var(--mono); font-size:17px; letter-spacing:0.14em; text-transform:uppercase;
+    padding:11px 14px; border-radius:3px;
+  }
+  .namefield input:focus{ outline:none; border-color:var(--toxic-dim); }
+  .namefield input::placeholder{ color:var(--text-faint); letter-spacing:0.1em; }
+  .topbar .who{ color:var(--toxic); }
   .btn-primary{
     background:linear-gradient(180deg, #2c4826, #1c2f19); color:var(--paper);
     border:1px solid var(--toxic-dim); font-family:var(--mono); font-weight:600;
@@ -418,7 +429,7 @@
 <div class="app">
 
   <div class="topbar">
-    <div class="brand"><span class="dot"></span> FACILITY SECURITY FEED — NIGHT SHIFT</div>
+    <div class="brand"><span class="dot"></span> FACILITY SECURITY FEED — NIGHT SHIFT<span class="who" id="whoAmI"></span></div>
     <button class="soundbtn" id="soundToggle">🔊 SOUND ON</button>
   </div>
 
@@ -433,6 +444,10 @@
         <p class="tag">A research facility. A sabotaged centrifuge. Six missing filter cartridges.
         Five employees who were still inside when it happened.<br><br>
         Somebody in this building is not who they claim to be — and they are watching how you investigate.</p>
+        <div class="namefield">
+          <label for="playerName">Detective on duty</label>
+          <input id="playerName" maxlength="20" autocomplete="off" spellcheck="false" placeholder="YOUR NAME">
+        </div>
         <button class="btn-primary" id="btnBegin">Begin Investigation</button>
       </div>
     </section>
