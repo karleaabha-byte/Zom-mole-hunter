@@ -309,7 +309,6 @@ async function renderBrief(){
 }
 
 function renderHub(){
-  renderWho();
   const grid=$('roomsGrid'); grid.innerHTML='';
   C.rooms.forEach(room=>{
     const done=G.visited_rooms.includes(room),d=document.createElement('div');
@@ -362,7 +361,7 @@ function terminal(){
     $('terminalBody').innerHTML=`<div class="terminal-ok"><div class="stamp">ACCESS VERIFIED</div><h2>Restricted Access Terminal</h2><div class="term-msg ok" style="font-size:18px;margin-top:14px"><b>✓ PIN VERIFIED</b></div><p class="sub" style="margin-top:12px">Restricted employee access is unlocked.</p>${G.security_challenge_complete?'<p class="sub">Interrogation is available.</p>':''}<div style="margin-top:18px"><button class="btn-term" id="tc">CLOSE TERMINAL</button></div></div>`;
     openModal('modalTerminal');$('tc').onclick=()=>closeModal('modalTerminal');return;
   }
-  $('terminalBody').innerHTML=`<div class="stamp">RESTRICTED TERMINAL</div><h2>Access Control</h2><p>Assemble the four-digit access code from the Lab, Storage and Cafeteria clues.</p><div class="terminal-code"><input id="pi" maxlength="4" inputmode="numeric" placeholder="••••"><button class="btn-primary" id="pv">VERIFY</button></div><div id="pr" class="term-msg"></div>`;
+  $('terminalBody').innerHTML=`<div class="stamp">RESTRICTED TERMINAL</div><h2>Access Control</h2><p>Assemble the four-digit access code from the Laboratory and Cafeteria evidence.</p><div class="terminal-code"><input id="pi" maxlength="4" inputmode="numeric" placeholder="••••"><button class="btn-primary" id="pv">VERIFY</button></div><div id="pr" class="term-msg"></div>`;
   openModal('modalTerminal');
   $('pv').onclick=async()=>{const z=await api('/api/pin',{guess:$('pi').value});G=z.state;if(!z.ok){Sound.wrong();$('pr').textContent=z.result;return;}Sound.unlock();closeModal('modalTerminal');renderHub();if(G.security_challenge_active)wordle();};
   $('pi').onkeydown=e=>{if(e.key==='Enter')$('pv').click()};
@@ -442,19 +441,10 @@ function finish(){
   const end=$('screen-end');
   $('verdictText').textContent=win?'✓ MOLE CORRECTLY FOUND':'✕ WRONG ACCUSATION';
   $('verdictText').className='verdict '+(win?'win':'lose');
-  const who=G.player_name&&G.player_name!=='DETECTIVE'?`DETECTIVE ${esc(G.player_name)} — `:'';
-  $('verdictText').textContent=who+$('verdictText').textContent;
   $('verdictSub').innerHTML=win?'<b>YES — ZEPHYR IS THE MOLE.</b><br>THE MOLE WAS CAUGHT.':'<b>NO — '+esc((G.accused||'UNKNOWN').toUpperCase())+' IS NOT THE MOLE.</b><br>The real mole was <b>ZEPHYR</b>, the Supply Coordinator.';
-  $('endReport').innerHTML=`<div class="stat-line"><span>Case result</span><b>${win?'MOLE CAUGHT':'MOLE ESCAPED'}</b></div><div class="stat-line"><span>Accused</span><b>${esc(G.accused||'—')}</b></div><div class="stat-line"><span>Secondary security</span><b>${G.security_challenge_complete?'DEFEATED':G.wordle_failed?'FAILED':'NOT USED'}</b></div><div class="stat-line"><span>Actions taken</span><b>${G.actions_used}</b></div><div style="margin-top:18px;padding:16px;border-left:3px solid ${win?'var(--toxic-dim)':'var(--rust)'};background:rgba(0,0,0,.06);line-height:1.65"><b>${win?'THE MOLE WAS CAUGHT.':'THE MOLE ESCAPED.'}</b><br><br>${win?'The Laboratory, Cafeteria, Storage and interrogation evidence pointed to Zephyr.':'The actual mole was Zephyr.'}</div>`;
+  $('endReport').innerHTML=`<div class="stat-line"><span>Case result</span><b>${win?'MOLE CAUGHT':'MOLE ESCAPED'}</b></div><div class="stat-line"><span>Accused</span><b>${esc(G.accused||'—')}</b></div><div class="stat-line"><span>Secondary security</span><b>${G.wordle_failed?'FAILED':G.security_challenge_complete?'DEFEATED':'NOT USED'}</b></div><div class="stat-line"><span>Actions taken</span><b>${G.actions_used}</b></div><div style="margin-top:18px;padding:16px;border-left:3px solid ${win?'var(--toxic-dim)':'var(--rust)'};background:rgba(0,0,0,.06);line-height:1.65"><b>${win?'THE MOLE WAS CAUGHT.':'THE MOLE ESCAPED.'}</b><br><br>${win?'The Laboratory, Cafeteria, Storage and interrogation evidence pointed to Zephyr.':'The actual mole was Zephyr.'}</div>`;
   show('screen-end');
   $('btnRestart').onclick=async()=>{Sound.click();try{await api('/api/new',{});}finally{window.location.href=window.location.pathname+'?new='+Date.now();}};
-}
-
-function renderWho(){
-  const el=$('whoAmI');
-  if(!el)return;
-  const n=G&&G.player_name&&G.player_name!=='DETECTIVE'?G.player_name:'';
-  el.textContent=n?`  ·  DET. ${n}`:'';
 }
 
 async function boot(){
@@ -465,23 +455,10 @@ async function boot(){
       Sound.init();
       Sound.click();
       if(!C){try{C=await api('/api/case');}catch(e){alert('Could not load the case. Make sure zom_mole_hunter.py is running.');return;}}
-      const nameInput=$('playerName');
-      const typed=nameInput?nameInput.value.trim():'';
-      try{
-        const z=await api('/api/name',{name:typed});
-        if(z&&z.state)G=z.state;
-      }catch(e){console.error('Could not set the detective name:',e);}
-      renderWho();
       renderBrief();
     };
   }
   try{C=await api('/api/case');G=await api('/api/state');}catch(e){console.error('Startup load failed:',e);}
-  const nameInput=$('playerName');
-  if(nameInput){
-    if(G&&G.player_name&&G.player_name!=='DETECTIVE')nameInput.value=G.player_name;
-    nameInput.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('btnBegin').click();}};
-  }
-  renderWho();
   const bind=(id,fn)=>{const el=$(id);if(el)el.onclick=fn;};
   bind('btnEnter',()=>{Sound.init();Sound.unlock();show('screen-hub');renderHub();});
   bind('btnEyesOnly',eyesOnly); bind('btnTerminal',terminal); bind('btnNotes',notes);
