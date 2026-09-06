@@ -20,8 +20,6 @@ class GameState:
         self.mole_ai = MoleAI(seed)
         self.evidence = EvidenceBoard()
 
-        self.player_name = "DETECTIVE"
-
         self.actions_used = 0
         self.visited_rooms = {}
         self.room_decisions = {}
@@ -54,21 +52,6 @@ class GameState:
         self.storage_roll = (GameState.run_number % 2 == 0)
 
         self.cafeteria_evidence_found = False
-
-    def set_player_name(self, name):
-        name = str(name).strip()
-
-        # Keep it short and safe for display.
-        name = "".join(
-            ch for ch in name
-            if ch.isalnum() or ch in " .-'"
-        )[:20].strip()
-
-        self.player_name = name.upper() if name else "DETECTIVE"
-
-        self._log(f"Case assigned to Detective {self.player_name}.")
-
-        return True, self.player_name
 
     def can_act(self):
         return not self.game_over
@@ -196,6 +179,7 @@ class GameState:
 
         if len(self.wordle_attempts) >= WORDLE_MAX_ATTEMPTS:
             self.security_challenge_active = False
+            self.security_challenge_complete = True
             self.wordle_failed = True
             return False, "ATTEMPTS_EXHAUSTED"
 
@@ -248,11 +232,13 @@ class GameState:
 
         if len(self.wordle_attempts) >= WORDLE_MAX_ATTEMPTS:
             self.security_challenge_active = False
+            self.security_challenge_complete = True
             self.wordle_failed = True
 
             self._log(
                 "Security challenge failed; "
-                "interrogation access remains blocked."
+                "interrogation access is unlocked, but Zephyr "
+                "now knows the lock was defeated by attrition."
             )
 
             return False, {
@@ -352,7 +338,6 @@ class GameState:
 
     def get_stats(self):
         return {
-            "player_name": self.player_name,
             "actions_used": self.actions_used,
             "result": self.result,
             "accused": self.accused,
